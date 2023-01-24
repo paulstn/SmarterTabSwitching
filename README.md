@@ -12,3 +12,6 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 ## Stretch Goals:
 1. “Pinned Tabs”: Keybind to open a specific tab regardless of placement or recency
 2. Tab sorting by similar domains (.google.com, etc.)
+
+## Repository Layout
+### Report
