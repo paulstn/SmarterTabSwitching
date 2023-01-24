@@ -14,7 +14,7 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 2. Tab sorting by similar domains (.google.com, etc.)
 
 ## Repository Layout
-### Report
+### reports
 <pre>
   Contains weekly team report and individual report files.
 </pre>
