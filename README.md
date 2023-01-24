@@ -16,5 +16,5 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 ## Repository Layout
 ### Report
 <pre>
-  Contains weekly team report files
+  Contains weekly team report and individual report files.
 </pre>
