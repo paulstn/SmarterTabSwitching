@@ -1,4 +1,7 @@
-# SmarterTabSwitching
+# SmarterTabSwitching CSE403 WIN23
+
+## Project Description:
+Our idea is to add a user-friendly way to cycle through tabs in the same window in Google Chrome, by order of the most recently opened tab. This should allow us to access our previously visited tab regardless of its location within other tabs with a simple click of the keyboard commands CTRL-TAB. Additionally, if the user holds down CTRL and then presses TAB however many times they want to press TAB, the extension does the same thing as before and switches to the appropriate tab, but also displays a mini tab window pop up. This is similar to how the Windows OS’s alt-tab feature works. We also want to include options for customization such as changing keybindings and retaining the original functionality.
 
 ## Features:
 1. Switching to most recently used tab from CTRL+TAB
