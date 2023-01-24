@@ -18,3 +18,8 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 <pre>
   Contains weekly team report and individual report files.
 </pre>
+
+### src
+<pre>
+  Has the source code of the project
+</pre>
