@@ -1,4 +1,18 @@
-chrome.tabs.onActivated.addListener(moveToFirstPosition);
+// chrome.tabs.onActivated.addListener(moveToFirstPosition);
+
+chrome.action.onClicked.addListener((tab) => {
+  chrome.scripting.executeScript({
+    target: {tabId: tab.id},
+    func: contentScriptFunc,
+    args: ['action'],
+  });
+});
+
+function contentScriptFunc(name) {
+  alert(`"${name}" executed`);
+}
+
+
 
 async function moveToFirstPosition(activeInfo) {
   try {
