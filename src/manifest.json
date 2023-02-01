@@ -6,6 +6,10 @@
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_title": "Click to show an alert",
+    "default_popup": "popup.html"
+  },
   "commands": {
     "switch-tab": {
       "suggested_key": {
