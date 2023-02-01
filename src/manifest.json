@@ -2,21 +2,17 @@
   "manifest_version": 3,
   "name": "SmarterTabSwitching",
   "version": "0.1",
-  "host_permissions": [
-    "https://developer.chrome.com/*"
-  ],
-  "action": {
-    "default_title": "Click to show an alert",
-    "default_popup": "popup.html"
-  },
-  "permissions": ["activeTab", "scripting", "tabs"],
+  "permissions": ["tabs"],
   "background": {
     "service_worker": "background.js"
   },
   "commands": {
-    "_execute_action": {
-      "suggested_key": "Ctrl+Q",
-      "description": "Switch tabs"
+    "switch-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Q"
+      },
+      "description": "Move to the first tab",
+      "global": true
     }
   }
 }
