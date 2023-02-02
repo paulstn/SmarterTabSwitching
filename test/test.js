@@ -1,8 +1,14 @@
 'use strict'
 
 const puppeteer = require('puppeteer');
+const test = require('node:test');
+const assert = require('node:assert');
 
-(async () => {
+test('basic test', async (t) => {
+    assert.strictEqual(1 + 2, 3, 'expected 3');
+})
+
+test('test puppeteer javascript Eval', async (t) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto('https://news.ycombinator.com', {
@@ -13,12 +19,8 @@ const puppeteer = require('puppeteer');
         return 1 + 2;
     });
 
-    if (three !== 3) {
-        console.error("error");
-    } else {
-        console.log("success");
-    }
+    assert.strictEqual(three, 3, "expected to get 3");
     
   
     await browser.close();
-  })();
+  });
