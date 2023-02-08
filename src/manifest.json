@@ -2,7 +2,10 @@
   "manifest_version": 3,
   "name": "SmarterTabSwitching",
   "version": "0.1",
-  "permissions": ["tabs"],
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
   "background": {
     "service_worker": "background.js"
   },
