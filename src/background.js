@@ -1,12 +1,7 @@
-// var currTabId = 0;
-// var lastTabId = 0;
-
 // keep an mru cache for every window
 
-// mru cache
+// mru cache, not in use
 var mruCache = [];
-
-// problem solved: issues with lossy state and consistency achieved
 
 // Listen for keyboard shortcut
 chrome.commands.onCommand.addListener(function(command) {
@@ -29,8 +24,6 @@ chrome.commands.onCommand.addListener(function(command) {
 
 // Listen for every new tab
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-  // console.log(activeInfo);
-
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
 
@@ -48,6 +41,4 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
   // TODO: should we implement an inverted index to have quick removing?
 
   // mruCache.push(activeInfo.tabId);
-
-  // console.log(`mru cache now: ${mruCache}`);
 });
