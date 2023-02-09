@@ -1,7 +1,6 @@
 // keep an mru cache for every window
 
-// mru cache, not in use
-var mruCache = [];
+var DEBUG = true;
 
 // Listen for keyboard shortcut
 chrome.commands.onCommand.addListener(function(command) {
@@ -22,13 +21,36 @@ chrome.commands.onCommand.addListener(function(command) {
   }
 });
 
+//run whenever we start Chrome, initialize MRU Cache
+chrome.runtime.onStartup.addListener(async function(){
+  var tabs = await chrome.tabs.query({"currentWindow": true});
+  chrome.storage.session.set({"MRU-ID-Cache": tabs.map(function(tab) {
+    return tab.tabId;
+  })})
+  .then(() => logMRU());
+})
+
+function logMRU() {
+  if (DEBUG) {
+    chrome.storage.session.get(["MRU-ID-Cache"]).then((result) => {
+      console.log("MRU Cache: " + result.MRU_ID_Cache);
+    });
+  }
+}
+
 // Listen for every new tab
 chrome.tabs.onActivated.addListener(function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
 
+  chrome.storage.session.get(["MRU-ID-Cache"]).then((result) => {
+    chrome.storage.session.set({ "lastTabId": result.currTabId }).then(() => {
+      console.log("lastTabId is set to " + result.currTabId);
+    });
+  });
+
   // this gets the value of currTabId from session storage, and sets lastTabId to it
-  chrome.storage.session.get(["currTabId"]).then((result) => {    
+  chrome.storage.session.get(["currTabId"]).then((result) => {
     chrome.storage.session.set({ "lastTabId": result.currTabId }).then(() => {
       console.log("lastTabId is set to " + result.currTabId);
     });
