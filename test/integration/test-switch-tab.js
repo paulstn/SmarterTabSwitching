@@ -1,32 +1,9 @@
 'use strict'
 
-const puppeteer = require('puppeteer');
-const path = require('path');
-const test = require('node:test');
-const assert = require('node:assert');
-
-async function initializeExtension() {
-    const pathToExtension = path.join(process.cwd(), 'src');
-    const browser = await puppeteer.launch({
-        headless: false,
-        // uncomment for trying to actually see what puppeteer is doing
-        // or if there could be race conditions
-        // if there are race conditions, put a sleep in the code instead of leaving it on
-        //slowMo: 500,
-        args: [
-        `--disable-extensions-except=${pathToExtension}`,
-        `--load-extension=${pathToExtension}`,
-        ],
-    });
-    const serviceWorkerTarget = await browser.waitForTarget(
-        target => target.type() === 'service_worker'
-    );
-    const service_worker = await serviceWorkerTarget.worker();
-    await sleep(250);
-    return [browser, service_worker];
-}
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import puppeteer from "puppeteer";
+import test from "node:test";
+import assert from "node:assert"
+import {initializeExtension, sleep} from "../utils.js";
 
 test("Top level extension test", async (t) => {
     // can comment this out and just have
@@ -51,13 +28,12 @@ test("Top level extension test", async (t) => {
     });
     
     await t.test("Test Get/Set MRU", async (t) => {
-        const result = await service_worker.evaluate(async () => {
+        const cache = await service_worker.evaluate(async () => {
             const [tab] = await chrome.tabs.query({"currentWindow": true});
             await setMRU([tab.id]);
-            return chrome.storage.session.get("MRU_ID_Cache");
+            return await getMRU();
         });
         assert.notDeepStrictEqual(result, {}, "expected a real object result");
-        const cache = result.MRU_ID_Cache;
         assert.notStrictEqual(cache, undefined, "expected a cache to be found");
         assert.strictEqual(typeof(cache), typeof([]));
         assert.strictEqual(cache.length, 1);
@@ -66,10 +42,9 @@ test("Top level extension test", async (t) => {
     await t.test('Test Initialization of MRU', async (t) => {
         const page = await browser.newPage();
         await page.bringToFront();
-        const result = await service_worker.evaluate(async () => {
-            return chrome.storage.session.get("MRU_ID_Cache");
+        const cache = await service_worker.evaluate(async () => {
+            return await getMRU();
         });
-        const cache = result.MRU_ID_Cache;
         assert.strictEqual(cache.length, 1, "expect one tab currently in the cache");
     });
 
@@ -78,10 +53,9 @@ test("Top level extension test", async (t) => {
         await page1.bringToFront();
         const page2 = await browser.newPage();
         await page2.bringToFront();
-        const result = await service_worker.evaluate(async () => {
-            return chrome.storage.session.get("MRU_ID_Cache");
+        const cache = await service_worker.evaluate(async () => {
+            return await getMRU();
         });
-        const cache = result.MRU_ID_Cache;
         assert.strictEqual(cache.length, 2, "expect two tabs currently in the cache");
     });
 
@@ -90,19 +64,17 @@ test("Top level extension test", async (t) => {
         await page1.bringToFront();
         const page2 = await browser.newPage();
         await page2.bringToFront();
-        const result = await service_worker.evaluate(async () => {
-            return chrome.storage.session.get("MRU_ID_Cache");
+        const cache1 = await service_worker.evaluate(async () => {
+            return await getMRU();
         });
-        const [tab1a, tab2a] = result.MRU_ID_Cache;
         await page2.keyboard.press('0', {commands: ["switch-tab"]});
         sleep(250);
-        const result2 = await service_worker.evaluate(async () => {
-            return chrome.storage.session.get("MRU_ID_Cache");
+        const cache2 = await service_worker.evaluate(async () => {
+            return await getMRU();
         });
-        const [tab1b, tab2b] = result2.MRU_ID_Cache;
-        console.log([tab1a, tab2a, tab1b, tab2b]);
-        assert.strictEqual(tab1a, tab2b, "tabs should be swapped");
-        assert.strictEqual(tab2a, tab1b, "tabs should be swapped");
+        console.log([cache1[0], cache1[1], cache2[0], cache2[1]]);
+        assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
+        assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
     });
 });
 

@@ -3,28 +3,37 @@
 const DEBUG = true;
 
 async function setMRU(tabs) {
-  await chrome.storage.session.set({"MRU_ID_Cache": tabs})
-  await logMRU();
+  await chrome.storage.session.set({"MRU_ID_Cache": tabs});
+  if (DEBUG) {
+    await logMRU();
+  }
 }
 
 async function logMRU() {
+  const cache = getMRU();
+  console.log("MRU Cache: " + cache);
+}
+
+async function getMRU() {
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  return result.MRU_ID_Cache;
+}
+
+async function switch_tab() {
   if (DEBUG) {
-    const result = await chrome.storage.session.get("MRU_ID_Cache");
-    console.log("MRU Cache: " + result.MRU_ID_Cache);
+    console.log("command triggered");
   }
+  const cache = getMRU();
+  // this automatically calls to the tab onActivated callback so we don't
+  // need to set the cache to anything here
+  await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
 }
 
 // Listen for keyboard shortcut
 chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
-      console.log("command triggered");
-
-      const result = await chrome.storage.session.get("MRU_ID_Cache");
-      const cache = result.MRU_ID_Cache;
-      // this automatically calls to the tab onActivated callback so we don't
-      // need to set the cache to anything here
-      await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
+      await switch_tab();
   }
 });
 
@@ -32,8 +41,7 @@ chrome.commands.onCommand.addListener(async function(command) {
 chrome.tabs.onActivated.addListener(async function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
-  const result = await chrome.storage.session.get("MRU_ID_Cache");
-  var cache = result.MRU_ID_Cache;
+  var cache = getMRU();
   if (cache === undefined) {
     // we haven't initialized a cache yet
     // the reason we don't do this on session/Chrome startup is
