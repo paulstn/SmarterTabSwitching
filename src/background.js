@@ -1,61 +1,54 @@
 // keep an mru cache for every window
 
-var DEBUG = true;
+const DEBUG = true;
 
-function setMRU(tabs) {
-  chrome.storage.session.set({"MRU-ID-Cache": tabs})
-  .then(() => logMRU());
+async function setMRU(tabs) {
+  await chrome.storage.session.set({"MRU_ID_Cache": tabs})
+  await logMRU();
 }
 
-function logMRU() {
+async function logMRU() {
   if (DEBUG) {
-    chrome.storage.session.get(["MRU-ID-Cache"]).then((result) => {
-      console.log("MRU Cache: " + result.MRU_ID_Cache);
-    });
+    const result = await chrome.storage.session.get("MRU_ID_Cache");
+    console.log("MRU Cache: " + result.MRU_ID_Cache);
   }
 }
 
 // Listen for keyboard shortcut
-chrome.commands.onCommand.addListener(function(command) {
+chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
       console.log("command triggered");
 
-      // we're looking within session data to grab the lastTabId
-      chrome.storage.session.get(["lastTabId"]).then((result) => {
-        console.log("Value currently is " + result.lastTabId);
-        // the update method grabs the tab it receives in the first parameter and
-        //   makes its 'active' and 'highlight' features true, which acts to switch to it
-        // 'active' lets the tab be computationally active
-        // 'highlighted' does the actual switching to the tab
-        chrome.tabs.update(result.lastTabId, {active: true, highlighted: true});
-      });
-
+      const result = await chrome.storage.session.get("MRU_ID_Cache");
+      const cache = result.MRU_ID_Cache;
+      // this automatically calls to the tab onActivated callback so we don't
+      // need to set the cache to anything here
+      await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
   }
 });
 
-//run whenever we start Chrome, initialize MRU Cache
-chrome.runtime.onStartup.addListener(async function(){
-  var tabs = await chrome.tabs.query({"currentWindow": true});
-  var tabIDs = tabs.map(function(tab) {
-    return tab.tabId;
-  });
-  setMRU(tabIDs);
-})
-
 // Listen for every new tab
-chrome.tabs.onActivated.addListener(function(activeInfo) {
+chrome.tabs.onActivated.addListener(async function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  var cache = result.MRU_ID_Cache;
+  if (cache === undefined) {
+    // we haven't initialized a cache yet
+    // the reason we don't do this on session/Chrome startup is
+    // because race conditions can still cause the session to get
+    // asked for the cache before the cache has been set from the startup handler 
+    const tabIds = [activeInfo.tabId];
+    cache = tabIds;
+    await setMRU(tabIds);
+  }
 
-  chrome.storage.session.get(["MRU-ID-Cache"]).then((result) => {
-    var activeTab = activeInfo.tabId;
-    var cache = result.MRU_ID_Cache;
-    var index = cache.indexOf(activeTab);
-    if (index != -1) {
-      cache.splice(index, 1);
-    }
-    cache.push(activeTab);
-    setMRU(cache);
-  });
+  const activeTab = activeInfo.tabId;
+  const index = cache.indexOf(activeTab);
+  if (index != -1) {
+    cache.splice(index, 1);
+  }
+  cache.push(activeTab);
+  await setMRU(cache);
 });
