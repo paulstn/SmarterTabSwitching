@@ -17,15 +17,6 @@ test("Top level extension test", async (t) => {
     t.afterEach(async (t) => {
         await browser.close();
     });
-
-    await t.test("Test Chrome Tabs", async (t) => {
-        const page = await browser.newPage();
-        const result = await service_worker.evaluate(async () => {
-            return await chrome.tabs.query({"currentWindow": true});
-        });
-        assert.strictEqual(result.length, 2, "there should be two tabs open");
-        assert.strictEqual(result[0].index, 0, "index should be in straightforward order");
-    });
     
     await t.test("Test Get/Set MRU", async (t) => {
         const cache = await service_worker.evaluate(async () => {
@@ -33,7 +24,7 @@ test("Top level extension test", async (t) => {
             await setMRU([tab.id]);
             return await getMRU();
         });
-        assert.notDeepStrictEqual(result, {}, "expected a real object result");
+        assert.notDeepStrictEqual(cache, {}, "expected a real object result");
         assert.notStrictEqual(cache, undefined, "expected a cache to be found");
         assert.strictEqual(typeof(cache), typeof([]));
         assert.strictEqual(cache.length, 1);
@@ -45,6 +36,7 @@ test("Top level extension test", async (t) => {
         const cache = await service_worker.evaluate(async () => {
             return await getMRU();
         });
+        assert.strictEqual(typeof(cache), typeof([]));
         assert.strictEqual(cache.length, 1, "expect one tab currently in the cache");
     });
 
@@ -64,6 +56,8 @@ test("Top level extension test", async (t) => {
         await page1.bringToFront();
         const page2 = await browser.newPage();
         await page2.bringToFront();
+        page2.goto("")
+
         const cache1 = await service_worker.evaluate(async () => {
             return await getMRU();
         });

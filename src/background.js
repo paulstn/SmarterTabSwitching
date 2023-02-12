@@ -10,7 +10,7 @@ async function setMRU(tabs) {
 }
 
 async function logMRU() {
-  const cache = getMRU();
+  const cache = await getMRU();
   console.log("MRU Cache: " + cache);
 }
 
@@ -23,7 +23,7 @@ async function switch_tab() {
   if (DEBUG) {
     console.log("command triggered");
   }
-  const cache = getMRU();
+  const cache = await getMRU();
   // this automatically calls to the tab onActivated callback so we don't
   // need to set the cache to anything here
   await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
@@ -41,7 +41,8 @@ chrome.commands.onCommand.addListener(async function(command) {
 chrome.tabs.onActivated.addListener(async function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
-  var cache = getMRU();
+  var cache = await getMRU();
+  console.log(cache);
   if (cache === undefined) {
     // we haven't initialized a cache yet
     // the reason we don't do this on session/Chrome startup is
