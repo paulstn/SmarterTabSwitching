@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 
 // don't want to recursively run this file
-const excluded_test_files = ["run.js"];
+const excluded_test_files = ["run.js", "package.json", "utils.js"];
 // should be run from the repo root dir
 const testDir = path.join(process.cwd(), 'test');
 
