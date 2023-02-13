@@ -1,26 +1,18 @@
 // keep an mru cache for every window
 
-// mru cache, not in use
-var mruCache = [];
-
 // Listen for keyboard shortcut
-chrome.commands.onCommand.addListener(function(command) {
-  // the 'switch-tab' command is defined in the manifest
-  if (command === "switch-tab") {
-      console.log("command triggered");
+function switch_tabs() {
+    // we're looking within session data to grab the lastTabId
+    chrome.storage.session.get(["lastTabId"]).then((result) => {
+      console.log("Value currently is " + result.lastTabId);
+      // the update method grabs the tab it receives in the first parameter and
+      //   makes its 'active' and 'highlight' features true, which acts to switch to it
+      // 'active' lets the tab be computationally active
+      // 'highlighted' does the actual switching to the tab
+      chrome.tabs.update(result.lastTabId, {active: true, highlighted: true});
+    });
 
-      // we're looking within session data to grab the lastTabId
-      chrome.storage.session.get(["lastTabId"]).then((result) => {
-        console.log("Value currently is " + result.lastTabId);
-        // the update method grabs the tab it receives in the first parameter and
-        //   makes its 'active' and 'highlight' features true, which acts to switch to it
-        // 'active' lets the tab be computationally active
-        // 'highlighted' does the actual switching to the tab
-        chrome.tabs.update(result.lastTabId, {active: true, highlighted: true});
-      });
-
-  }
-});
+}
 
 // Listen for every new tab
 chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -42,3 +34,11 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
   // mruCache.push(activeInfo.tabId);
 });
+
+chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
+  console.log(message)
+
+  switch_tabs();
+  // console.log(sender)
+  sendResponse("Received message in background!")
+})

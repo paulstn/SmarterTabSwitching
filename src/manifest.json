@@ -4,7 +4,9 @@
   "version": "0.1",
   "permissions": [
     "tabs",
-    "storage"
+    "storage",
+    "activeTab",
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js"
@@ -14,12 +16,22 @@
     "default_popup": "popup.html"
   },
   "commands": {
-    "switch-tab": {
-      "suggested_key": {
-        "default": "Ctrl+Q"
-      },
-      "description": "Move to the first tab",
-      "global": true
+    // "switch-tab": {
+    //   "suggested_key": {
+    //     "default": "Ctrl+Q"
+    //   },
+    //   "description": "Move to the first tab",
+    //   "global": true
+    // }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      // "css": ["my-styles.css"],
+      "js": ["command-testing.js"],
+      "run_at": "document_start",
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
     }
-  }
+  ]
 }
