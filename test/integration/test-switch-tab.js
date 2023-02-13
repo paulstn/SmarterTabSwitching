@@ -51,22 +51,25 @@ test("Top level extension test", async (t) => {
         assert.strictEqual(cache.length, 2, "expect two tabs currently in the cache");
     });
 
-    await t.test('Test switch tabs', {skip: "can't correctly trigger the shortcut"}, async (t) => {
+    // can't utilize keyboard shortcuts to test tab switching but can just call the method
+    await t.test('Test switch tabs', async (t) => {
         const page1 = await browser.newPage();
         await page1.bringToFront();
         const page2 = await browser.newPage();
         await page2.bringToFront();
-        page2.goto("")
 
         const cache1 = await service_worker.evaluate(async () => {
             return await getMRU();
         });
-        await page2.keyboard.press('0', {commands: ["switch-tab"]});
-        sleep(250);
+        // for some reason if we put this call in the block where we get cache2, it fails
+        // I think it's a timing thing and sending the eval request takes long enough
+        // so that the new tab listener triggers.
+        await service_worker.evaluate(async () => {
+            await switch_tab();
+        });
         const cache2 = await service_worker.evaluate(async () => {
             return await getMRU();
         });
-        console.log([cache1[0], cache1[1], cache2[0], cache2[1]]);
         assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
         assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
     });
