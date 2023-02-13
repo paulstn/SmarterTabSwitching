@@ -17,11 +17,12 @@ test("Top level extension test", async (t) => {
     t.afterEach(async (t) => {
         await browser.close();
     });
-    
-    await t.test("Test Get/Set MRU", async (t) => {
+
+    await t.test("Test manual Initialization of MRU", async (t) => {
         const cache = await service_worker.evaluate(async () => {
             const [tab] = await chrome.tabs.query({"currentWindow": true});
-            await setMRU([tab.id]);
+            const window = await chrome.windows.getCurrent();
+            await initializeMRU(tab.id, window.id);
             return await getMRU();
         });
         assert.notDeepStrictEqual(cache, {}, "expected a real object result");
@@ -30,7 +31,7 @@ test("Top level extension test", async (t) => {
         assert.strictEqual(cache.length, 1);
     });
 
-    await t.test('Test Initialization of MRU', async (t) => {
+    await t.test('Test Initialization of MRU by trigger', async (t) => {
         const page = await browser.newPage();
         await page.bringToFront();
         const cache = await service_worker.evaluate(async () => {

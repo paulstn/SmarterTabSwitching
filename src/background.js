@@ -3,20 +3,39 @@
 const DEBUG = true;
 
 async function setMRU(tabs) {
-  await chrome.storage.session.set({"MRU_ID_Cache": tabs});
+  const window = await chrome.windows.getCurrent();
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  var dict = result.MRU_ID_Cache;
+  if (dict === undefined) {
+    dict = {};
+  }
+  dict[window.id] = tabs;
+  await chrome.storage.session.set({"MRU_ID_Cache": dict});
   if (DEBUG) {
     await logMRU();
   }
 }
 
+async function initializeMRU(tabId, windowId) {
+  var dict = {};
+  dict[windowId] = [tabId];
+  await chrome.storage.session.set({"MRU_ID_Cache": dict});
+  return dict[windowId];
+}
+
 async function logMRU() {
   const cache = await getMRU();
-  console.log("MRU Cache: " + cache);
+  console.log(cache);
 }
 
 async function getMRU() {
+  const window = await chrome.windows.getCurrent();
   const result = await chrome.storage.session.get("MRU_ID_Cache");
-  return result.MRU_ID_Cache;
+  // if there isn't a cache already set, don't try to query that window
+  if (result.MRU_ID_Cache === undefined) {
+    return undefined;
+  }
+  return result.MRU_ID_Cache[window.id];
 }
 
 async function switch_tab() {
@@ -42,16 +61,15 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
   var cache = await getMRU();
-  console.log(cache);
   if (cache === undefined) {
-    // we haven't initialized a cache yet
+    // we haven't initialized a cache yet, need to add
+    // based on current tab and window
     // the reason we don't do this on session/Chrome startup is
     // because race conditions can still cause the session to get
-    // asked for the cache before the cache has been set from the startup handler 
-    const tabIds = [activeInfo.tabId];
-    cache = tabIds;
-    await setMRU(tabIds);
+    // asked for the cache before the cache has been set from the startup handler\
+    cache = await initializeMRU(activeInfo.tabId, activeInfo.windowId);
   }
+  console.log(cache);
 
   const activeTab = activeInfo.tabId;
   const index = cache.indexOf(activeTab);
