@@ -1,44 +1,81 @@
 // keep an mru cache for every window
 
-// mru cache, not in use
-var mruCache = [];
+const DEBUG = true;
+
+async function setMRU(tabs) {
+  const window = await chrome.windows.getCurrent();
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  var dict = result.MRU_ID_Cache;
+  if (dict === undefined) {
+    dict = {};
+  }
+  dict[window.id] = tabs;
+  await chrome.storage.session.set({"MRU_ID_Cache": dict});
+  if (DEBUG) {
+    await logMRU();
+  }
+}
+
+async function initializeMRU(tabId, windowId) {
+  var dict = {};
+  dict[windowId] = [tabId];
+  await chrome.storage.session.set({"MRU_ID_Cache": dict});
+  return dict[windowId];
+}
+
+async function logMRU() {
+  const cache = await getMRU();
+  console.log(cache);
+}
+
+async function getMRU() {
+  const window = await chrome.windows.getCurrent();
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  // if there isn't a cache already set, don't try to query that window
+  if (result.MRU_ID_Cache === undefined) {
+    return undefined;
+  }
+  return result.MRU_ID_Cache[window.id];
+}
+
+async function switch_tab() {
+  if (DEBUG) {
+    console.log("command triggered");
+  }
+  const cache = await getMRU();
+  // this automatically calls to the tab onActivated callback so we don't
+  // need to set the cache to anything here
+  await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
+}
 
 // Listen for keyboard shortcut
-chrome.commands.onCommand.addListener(function(command) {
+chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
-      console.log("command triggered");
-
-      // we're looking within session data to grab the lastTabId
-      chrome.storage.session.get(["lastTabId"]).then((result) => {
-        console.log("Value currently is " + result.lastTabId);
-        // the update method grabs the tab it receives in the first parameter and
-        //   makes its 'active' and 'highlight' features true, which acts to switch to it
-        // 'active' lets the tab be computationally active
-        // 'highlighted' does the actual switching to the tab
-        chrome.tabs.update(result.lastTabId, {active: true, highlighted: true});
-      });
-
+      await switch_tab();
   }
 });
 
 // Listen for every new tab
-chrome.tabs.onActivated.addListener(function(activeInfo) {
+chrome.tabs.onActivated.addListener(async function(activeInfo) {
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
+  var cache = await getMRU();
+  if (cache === undefined) {
+    // we haven't initialized a cache yet, need to add
+    // based on current tab and window
+    // the reason we don't do this on session/Chrome startup is
+    // because race conditions can still cause the session to get
+    // asked for the cache before the cache has been set from the startup handler\
+    cache = await initializeMRU(activeInfo.tabId, activeInfo.windowId);
+  }
+  console.log(cache);
 
-  // this gets the value of currTabId from session storage, and sets lastTabId to it
-  chrome.storage.session.get(["currTabId"]).then((result) => {    
-    chrome.storage.session.set({ "lastTabId": result.currTabId }).then(() => {
-      console.log("lastTabId is set to " + result.currTabId);
-    });
-  });
-  // this set the value of currTabId to the current tab's id
-  chrome.storage.session.set({ "currTabId": activeInfo.tabId }).then(() => {
-    console.log("currTabId is set to " + activeInfo.tabId);
-  });
-
-  // TODO: should we implement an inverted index to have quick removing?
-
-  // mruCache.push(activeInfo.tabId);
+  const activeTab = activeInfo.tabId;
+  const index = cache.indexOf(activeTab);
+  if (index != -1) {
+    cache.splice(index, 1);
+  }
+  cache.push(activeTab);
+  await setMRU(cache);
 });
