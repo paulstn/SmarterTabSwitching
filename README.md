@@ -28,3 +28,7 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 <pre>
   Contains test code to be run
 </pre>
+
+## Getting started/Contributing
+
+See our [wiki](https://github.com/paulstn/SmarterTabSwitching/wiki) for information.
