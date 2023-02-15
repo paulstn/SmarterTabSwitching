@@ -24,20 +24,27 @@ window.addEventListener('keyup', (event) => {
             // this block of code is meant for handling the actual switching of tabs
             // upon multiple tab switching
             console.log("Now switch to another tab from multiple");
+           
+
+            var preview = document.getElementById(previewId);
+            preview.remove();
+
+            // CTRL TAB HELD
+            chrome.runtime.sendMessage(null,
+                                numSwitches % 5, 
+                                (response)=>{
+                console.log("Sent key value: " + response);
+            });         
+
             multipleOccurs = false;
             numSwitches = 0;
-
-            // TODO: need to implement removing of the preview box
-            var preview = document.getElementById(previewId);
-            console.log(preview);
-            preview.remove();
         } else if (qDown) {
             // this block is meant to handle a single switching, only switching to the previous
             // most recently used tab
             console.log("Single Switch");   
 
             chrome.runtime.sendMessage(null,
-                                    "CTRL Q PRESSED", 
+                                    "CTRL Q PRESSED",
                                     (response)=>{
                 console.log("Sent key value: " + response)
             });         
@@ -88,7 +95,7 @@ window.addEventListener('keyup', (event) => {
                 document.body.appendChild(popup);
             } else {
                 var preview = document.getElementById(previewId);
-                preview.children[0].innerHTML = "Switch tab num times: " + numSwitches;
+                preview.children[0].innerHTML = "Switch tab num times: " + numSwitches % 5;
             }
 
 
