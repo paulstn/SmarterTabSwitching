@@ -33,29 +33,16 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
   // TODO: should we implement an inverted index to have quick removing?
 
   // mruCache.push(activeInfo.tabId);
+
+
+  // chrome.tabs.captureVisibleTab({{"png"}});
 });
 
-async function open_popup() {
-  console.log("trying to open popup");
-  fetch(chrome.runtime.getURL('/previews.html'))
-  .then(response => response.text())
-  .then(html => {
-    document.body.appendChild(html);
-      // other code
-      // eg update injected elements,
-      // add event listeners or logic to connect to other parts of the app
-  }).catch(err => {
-      // handle error
-  });
-}
 
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
   console.log(message)
   if (message == "CTRL Q PRESSED") {
     switch_tabs();
     sendResponse("Switch tabs once");
-  } else if (message == "CTRL HELD") {
-    open_popup();
-    sendResponse("Brought up popup");
   }
 })
