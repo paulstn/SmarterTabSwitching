@@ -38,21 +38,22 @@ async function getMRU() {
   return result.MRU_ID_Cache[window.id];
 }
 
-async function switch_tab() {
+async function switch_tab(back_num) {
+  // TODO: add parameter checking for back_num? idk javascript
   if (DEBUG) {
     console.log("command triggered");
   }
   const cache = await getMRU();
   // this automatically calls to the tab onActivated callback so we don't
   // need to set the cache to anything here
-  await chrome.tabs.update(cache.at(cache.length - 2), {active: true, highlighted: true});
+  await chrome.tabs.update(cache.at(cache.length - 1 - back_num), {active: true, highlighted: true});
 }
 
 // Listen for keyboard shortcut
 chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
-      await switch_tab();
+      await switch_tab(1);
   }
 });
 
@@ -79,3 +80,15 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   cache.push(activeTab);
   await setMRU(cache);
 });
+
+
+chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
+  console.log(message)
+  if (message == "CTRL Q PRESSED") {
+    switch_tab(1);
+    sendResponse("Switch tabs once");
+  } else if (typeof message == "number") {
+    switch_tab(message);
+    sendResponse("Switched to " + message + " most recently used tab")
+  }
+})
