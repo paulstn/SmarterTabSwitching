@@ -68,6 +68,7 @@ test("Top level extension test", async (t) => {
         await service_worker.evaluate(async () => {
             await switch_tab();
         });
+        await sleep(1);
         const cache2 = await service_worker.evaluate(async () => {
             return await getMRU();
         });
