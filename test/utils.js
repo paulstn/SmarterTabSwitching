@@ -16,7 +16,6 @@ export async function initializeExtension() {
         args: [
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
-        '--no-sandbox',
         ],
     });
     const serviceWorkerTarget = await browser.waitForTarget(
