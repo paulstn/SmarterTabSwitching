@@ -22,6 +22,9 @@ Unfortunately, the below features only work with tabs that are not new tabs (tab
 1. “Pinned Tabs”: Keybind to open a specific tab regardless of placement or recency
 2. Tab sorting by similar domains (.google.com, etc.)
 
+## Known Issues:
+Look under the 'Issues' tab of our repository. There are detailed explanations of what our known issues are and plans to fix them.
+
 ## Repository Layout
 ### reports
 <pre>
