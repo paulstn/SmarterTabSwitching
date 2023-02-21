@@ -25,4 +25,16 @@ function get_files(dirName) {
     return result;
 }
 
-test.run({files: get_files(testDir)}).pipe(process.stdout);
+var testStream = test.run({files: get_files(testDir)});
+console.log(testStream);
+testStream.pipe(process.stdout);
+console.log(testStream);
+var error = false;
+for await (const event of testStream) {
+    if (typeOf(event) === test.fail)  {
+        error = true;
+    }
+}
+if (error) {
+    process.exit(1);
+}
