@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 
 test('basic test', async (t) => {
-    assert.strictEqual(1 + 2, 3, 'expected 3');
+    assert.strictEqual(1 + 3, 3, 'expected 3');
 });
 
 test('test puppeteer javascript Eval', async (t) => {
