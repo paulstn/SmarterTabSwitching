@@ -3,6 +3,6 @@
     "puppeteer": "^19.6.3"
   },
   "scripts": {
-    "test": "node test/run.js"
+    "test": "node --test test"
   }
 }
