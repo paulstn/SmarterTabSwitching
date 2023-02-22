@@ -91,16 +91,21 @@ window.addEventListener('keyup', (event) => {
                 // text.style["text-align"] = "center";
 
                 // const url = window.location.href;
-                // pic1RelPath = './src/preview-pics/1.png';
+                // pic1RelPath = `${window.location.origin}/src/preview-pics/1.png`;
                 // const pic1Path = new URL(pic1RelPath, url).href;
 
                 // const absolutePath = __dirname + pic1RelPath;
-
-                // var pic1 = document.createElement('img');
-                // pic1.src = absolutePath;
+                var pic1 = document.createElement('img');
+                pic1.onload = function() {
+                    console.log('Image loaded:', this.src);
+                };
+                pic1.onerror = function() {
+                    console.error('Error loading image:', this.src);
+                };
+                pic1.src = `/src/preview-pics/sampleImage.png`;
 
                 text_div.appendChild(text);
-                // text_div.appendChild(pic1);
+                text_div.appendChild(pic1);
                 popup.appendChild(text_div);
                 document.body.appendChild(popup);
             } else {
