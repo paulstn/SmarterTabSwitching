@@ -6,6 +6,7 @@ Our idea is to add a user-friendly way to cycle through tabs in the same window 
 ## Getting started/Contributing
 How to build our project, run it, and test it? 
 See our [wiki](https://github.com/paulstn/SmarterTabSwitching/wiki) for information.
+Report bugs and other issues using the "Issues" tab. Make sure to check existing issues to avoid duplicates
 
 ## Functionality so far (working use cases):
 Unfortunately, the below features only work with tabs that are not new tabs (tabs without a website loaded) or internal chrome websites (like chrome://extensions). 
