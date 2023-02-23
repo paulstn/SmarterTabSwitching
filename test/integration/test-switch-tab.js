@@ -34,6 +34,7 @@ test("Top level extension test", async (t) => {
     await t.test('Test Initialization of MRU by trigger', async (t) => {
         const page = await browser.newPage();
         await page.bringToFront();
+        await sleep(100);
         const cache = await service_worker.evaluate(async () => {
             return await getMRU();
         });

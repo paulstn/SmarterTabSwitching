@@ -2,40 +2,34 @@
 
 const DEBUG = true;
 
+var currentWindow = -1;
+
 async function setMRU(tabs) {
-  const window = await chrome.windows.getCurrent();
   const result = await chrome.storage.session.get("MRU_ID_Cache");
   var dict = result.MRU_ID_Cache;
   if (dict === undefined) {
     dict = {};
   }
-  dict[window.id] = tabs;
+  dict[currentWindow] = tabs;
   await chrome.storage.session.set({"MRU_ID_Cache": dict});
   if (DEBUG) {
     await logMRU();
   }
 }
 
-async function initializeMRU(tabId, windowId) {
-  var dict = {};
-  dict[windowId] = [tabId];
-  await chrome.storage.session.set({"MRU_ID_Cache": dict});
-  return dict[windowId];
-}
-
 async function logMRU() {
-  const cache = await getMRU();
-  console.log(cache);
+  const result = await chrome.storage.session.get("MRU_ID_Cache");
+  var dict = result.MRU_ID_Cache;
+  console.log(dict);
 }
 
 async function getMRU() {
-  const window = await chrome.windows.getCurrent();
   const result = await chrome.storage.session.get("MRU_ID_Cache");
   // if there isn't a cache already set, don't try to query that window
   if (result.MRU_ID_Cache === undefined) {
     return undefined;
   }
-  return result.MRU_ID_Cache[window.id];
+  return result.MRU_ID_Cache[currentWindow];
 }
 
 async function switch_tab(back_num) {
@@ -59,6 +53,8 @@ chrome.commands.onCommand.addListener(async function(command) {
 
 // Listen for every new tab
 chrome.tabs.onActivated.addListener(async function(activeInfo) {
+  currentWindow = activeInfo.windowId;
+  console.log(currentWindow);
   // need to keep session data stored. otherwise, data will get removed when the service worker
   // gets shut down, which happens if another program is in focus within the device
   var cache = await getMRU();
@@ -68,9 +64,8 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
     // the reason we don't do this on session/Chrome startup is
     // because race conditions can still cause the session to get
     // asked for the cache before the cache has been set from the startup handler\
-    cache = await initializeMRU(activeInfo.tabId, activeInfo.windowId);
+    cache = [];
   }
-  console.log(cache);
 
   const activeTab = activeInfo.tabId;
   const index = cache.indexOf(activeTab);
