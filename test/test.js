@@ -1,12 +1,12 @@
 'use strict'
 
-const puppeteer = require('puppeteer');
-const test = require('node:test');
-const assert = require('node:assert');
+import puppeteer from 'puppeteer';
+import test from 'node:test';
+import assert from 'node:assert';
 
 test('basic test', async (t) => {
     assert.strictEqual(1 + 2, 3, 'expected 3');
-})
+});
 
 test('test puppeteer javascript Eval', async (t) => {
     const browser = await puppeteer.launch();
