@@ -1,6 +1,6 @@
 // keep an mru cache for every window
 
-const DEBUG = true;
+const DEBUG = false;
 
 async function setMRU(tabs) {
   const window = await chrome.windows.getCurrent();
@@ -53,7 +53,20 @@ async function switch_tab(back_num) {
 chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
-      await switch_tab(1);
+      console.log("Chrome.commands: Trying switch");
+      // TODO: try changing to a promise
+      let url = "unset";
+      chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+        url = tabs[0].url;
+        console.log(url);
+        const toMatch = "chrome://";
+        if (url.slice(0,9) === toMatch) {
+          console.log("       Restricted Switch Done");
+          await switch_tab(1);
+        }
+      });
+      // let promise = chrome.tabs.query({active: true, lastFocusedWindow: true});
+      // url = promise.then((tabs) => {url = tabs[0].url;});
   }
 });
 
@@ -70,7 +83,7 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
     // asked for the cache before the cache has been set from the startup handler\
     cache = await initializeMRU(activeInfo.tabId, activeInfo.windowId);
   }
-  console.log(cache);
+  if (DEBUG) { console.log(cache); };
 
   const activeTab = activeInfo.tabId;
   const index = cache.indexOf(activeTab);
@@ -83,12 +96,14 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
 
 
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
-  console.log(message)
+  if (DEBUG) { console.log(message); };
   if (message == "CTRL Q PRESSED") {
     switch_tab(1);
-    sendResponse("Switch tabs once");
+    console.log("Content Scripts: Switch tabs once");
+    sendResponse("Content Scripts: Switch tabs once");
   } else if (typeof message == "number") {
     switch_tab(message);
-    sendResponse("Switched to " + message + " most recently used tab")
+    console.log("Content Scripts: Switched to " + message + " most recently used tab");
+    sendResponse("Content Scripts: Switched to " + message + " most recently used tab");
   }
 })

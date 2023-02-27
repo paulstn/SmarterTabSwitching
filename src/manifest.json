@@ -22,13 +22,13 @@
     }
   ],
   "commands": {
-    // "switch-tab": {
-    //   "suggested_key": {
-    //     "default": "Ctrl+Q"
-    //   },
-    //   "description": "Move to the first tab",
-    //   "global": true
-    // }
+    "switch-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Q"
+      },
+      "description": "Move to the first tab",
+      "global": true
+    }
   },
   "content_scripts": [
     {
