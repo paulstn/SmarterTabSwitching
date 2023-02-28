@@ -54,15 +54,13 @@ chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
       console.log("Chrome.commands: Trying switch");
-      let promisedTabs = chrome.tabs.query({active: true, currentWindow: true});
-      promisedTabs.then(async (tabs) => {
-        let url = tabs[0].url;
-        const toMatch = "chrome://";
-        if (url.slice(0,9) === toMatch) {
-          console.log("       Restricted Switch Done");
-          await switch_tab(1);
-        }      
-      });
+      let tabs = await chrome.tabs.query({active: true, currentWindow: true});
+      let url = tabs[0].url;
+      const toMatch = "chrome://";
+      if (url.slice(0,9) === toMatch) {
+        console.log("       Restricted Switch Done");
+        await switch_tab(1);
+      }
   }
 });
 
