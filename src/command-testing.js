@@ -11,11 +11,16 @@ window.addEventListener('keydown', (event) => {
     if (event.key == "Control") {
         ctrlDown = true;
     }
-
-    if (event.key == "q") {
-        qDown = true;
-    }
 });
+
+// helpful message from extension letting us know ctrl and q were pressed together
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if (request.qPressed) {
+        qDown = true;
+      }
+    }
+  );  
 
 window.addEventListener('keyup', (event) => {    
     if (event.key == "Control") {
@@ -30,24 +35,18 @@ window.addEventListener('keyup', (event) => {
             preview.remove();
 
             // CTRL TAB HELD
-            chrome.runtime.sendMessage(null,
-                                numSwitches % 5, 
-                                (response)=>{
-                console.log("Sent key value: " + response);
-            });         
+            chrome.runtime.sendMessage(null, {contentPresses: numSwitches % 5});         
 
             multipleOccurs = false;
             numSwitches = 0;
         } else if (qDown) {
             // this block is meant to handle a single switching, only switching to the previous
             // most recently used tab
-            console.log("Single Switch");   
+            console.log("Single Switch");
+            
+            qDown = false;
 
-            chrome.runtime.sendMessage(null,
-                                    "CTRL Q PRESSED",
-                                    (response)=>{
-                console.log("Sent key value: " + response)
-            });         
+            chrome.runtime.sendMessage(null, {contentPresses: 1});         
         }
     }
     if (event.key == "q") {

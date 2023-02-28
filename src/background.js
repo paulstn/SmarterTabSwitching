@@ -58,8 +58,12 @@ chrome.commands.onCommand.addListener(async function(command) {
       let url = tabs[0].url;
       const toMatch = "chrome://";
       if (url.slice(0,9) === toMatch) {
+        // immediately switch if we're on a restricted site
         console.log("       Restricted Switch Done");
         await switch_tab(1);
+      } else {
+        // send a message to content scripts, q was pressed w/ ctrl
+        await chrome.tabs.sendMessage(tabs[0].id, {qPressed: true});
       }
   }
 });
@@ -91,13 +95,9 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
 
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
   if (DEBUG) { console.log(message); };
-  if (message == "CTRL Q PRESSED") {
-    switch_tab(1);
-    console.log("Content Scripts: Switch tabs once");
-    sendResponse("Content Scripts: Switch tabs once");
-  } else if (typeof message == "number") {
-    switch_tab(message);
-    console.log("Content Scripts: Switched to " + message + " most recently used tab");
-    sendResponse("Content Scripts: Switched to " + message + " most recently used tab");
+  // this should check if the message has the object contentPresses
+  if (message.contentPresses) {
+    switch_tab(message.contentPresses);
+    console.log("Content Scripts: Switched to " + message.contentPresses + " most recently used tab");
   }
 })
