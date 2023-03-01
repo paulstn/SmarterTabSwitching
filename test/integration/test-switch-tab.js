@@ -75,5 +75,32 @@ test("Top level extension test", async (t) => {
         assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
         assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
     });
+
+    await t.test('Test switch tabs via keyboard', async (t) => {
+        const page1 = await browser.newPage();
+        await page1.bringToFront();
+        const page2 = await browser.newPage();
+        await page2.goto("https://example.com", {waitUntil: 'domcontentloaded'});
+        await page2.bringToFront();
+
+        const cache1 = await service_worker.evaluate(async () => {
+            return await getMRU();
+        });
+        page2.keyboard.down("Control");
+        page2.keyboard.down("q");
+        await sleep(50);
+        page2.keyboard.up("q");
+        await sleep(50);
+        const preview = await page2.$("#SmarterTabSwitchingPreviewPopupBox");
+        console.log(preview);
+        assert.notStrictEqual(preview, null);
+        page2.keyboard.up('Control');
+        await sleep(100);
+        const cache2 = await service_worker.evaluate(async () => {
+            return await getMRU();
+        });
+        assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
+        assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
+    });
 });
 
