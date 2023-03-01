@@ -20,14 +20,12 @@ test("Top level extension test", async (t) => {
 
     await t.test("Test manual Initialization of MRU", async (t) => {
         const cache = await service_worker.evaluate(async () => {
-            const tabs = await chrome.tabs.query({"currentWindow": true});
-            await setMRU(tabs);
+            await setMRU([1]);
             return await getMRU();
         });
         assert.notDeepStrictEqual(cache, {}, "expected a real object result");
         assert.notStrictEqual(cache, undefined, "expected a cache to be found");
-        assert.strictEqual(typeof(cache), typeof([]));
-        assert.strictEqual(cache.length, 1);
+        assert.deepStrictEqual(cache, [1]);
     });
 
     await t.test('Test Initialization of MRU by trigger', async (t) => {
@@ -65,6 +63,7 @@ test("Top level extension test", async (t) => {
         // for some reason if we put this call in the block where we get cache2, it fails
         // I think it's a timing thing and sending the eval request takes long enough
         // so that the new tab listener triggers.
+        await sleep(100);
         await service_worker.evaluate(async () => {
             await switch_tab(1);
         });
@@ -92,6 +91,7 @@ test("Top level extension test", async (t) => {
         const window2Id = await service_worker.evaluate(async () => {
             return currentWindow;
         });
+        // creates tab in old window (same as pages 1 and 2)
         const page4 = await browser.newPage();
         await page4.bringToFront();
 
@@ -113,8 +113,6 @@ test("Top level extension test", async (t) => {
         const cacheWindow2 = MRUDict[window2Id.toString()];
         assert.strictEqual(typeof(cacheWindow2), typeof([]));
         assert.strictEqual(cacheWindow2.length, 1);
-        console.log(cacheOld);
-        console.log(cacheNew);
 
         assert.strictEqual(cacheOld[2], cacheNew[1], "tabs should be swapped");
         assert.strictEqual(cacheNew[2], cacheOld[1], "tabs should be swapped");
