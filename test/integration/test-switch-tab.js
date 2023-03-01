@@ -86,15 +86,15 @@ test("Top level extension test", async (t) => {
         const cache1 = await service_worker.evaluate(async () => {
             return await getMRU();
         });
-        page2.keyboard.down("Control");
-        page2.keyboard.down("q");
+        await page2.keyboard.down("Control");
+        await page2.keyboard.down("q");
         await sleep(50);
-        page2.keyboard.up("q");
+        await page2.keyboard.up("q");
         await sleep(50);
         const preview = await page2.$("#SmarterTabSwitchingPreviewPopupBox");
         console.log(preview);
         assert.notStrictEqual(preview, null);
-        page2.keyboard.up('Control');
+        await page2.keyboard.up('Control');
         await sleep(100);
         const cache2 = await service_worker.evaluate(async () => {
             return await getMRU();
