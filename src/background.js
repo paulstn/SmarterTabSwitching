@@ -56,14 +56,15 @@ chrome.commands.onCommand.addListener(async function(command) {
       console.log("Chrome.commands: Trying switch");
       let tabs = await chrome.tabs.query({active: true, currentWindow: true});
       let url = tabs[0].url;
-      const toMatch = "chrome://";
-      if (url.slice(0,9) === toMatch) {
-        // immediately switch if we're on a restricted site
-        console.log("       Restricted Switch Done");
-        await switch_tab(1);
-      } else {
+      const https = "https://";
+      const http = "http://";
+      if (url.slice(0,8) === https || url.slice(0,8) === http) {
         // send a message to content scripts, q was pressed w/ ctrl
         await chrome.tabs.sendMessage(tabs[0].id, {qPressed: true});
+        // immediately switch if we're on a restricted site
+      } else {
+        console.log("       Restricted Switch Done");
+        await switch_tab(1);
       }
   }
 });
