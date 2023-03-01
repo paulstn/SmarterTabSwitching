@@ -3,7 +3,7 @@
 import puppeteer from "puppeteer";
 import test from "node:test";
 import assert from "node:assert"
-import {initializeExtension, sleep} from "../utils.js";
+import {initializeExtension, sleep, CreateNewWindowPage} from "../utils.js";
 
 test("Top level extension test", async (t) => {
     // can comment this out and just have
@@ -20,9 +20,8 @@ test("Top level extension test", async (t) => {
 
     await t.test("Test manual Initialization of MRU", async (t) => {
         const cache = await service_worker.evaluate(async () => {
-            const [tab] = await chrome.tabs.query({"currentWindow": true});
-            const window = await chrome.windows.getCurrent();
-            await initializeMRU(tab.id, window.id);
+            const tabs = await chrome.tabs.query({"currentWindow": true});
+            await setMRU(tabs);
             return await getMRU();
         });
         assert.notDeepStrictEqual(cache, {}, "expected a real object result");
@@ -67,7 +66,7 @@ test("Top level extension test", async (t) => {
         // I think it's a timing thing and sending the eval request takes long enough
         // so that the new tab listener triggers.
         await service_worker.evaluate(async () => {
-            await switch_tab();
+            await switch_tab(1);
         });
         await sleep(100);
         const cache2 = await service_worker.evaluate(async () => {
@@ -75,6 +74,51 @@ test("Top level extension test", async (t) => {
         });
         assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
         assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
+    });
+
+    // Not sure how to add more than 1 tab to a window but this at least make sure we're tracking
+    // tabs across all windows
+    await t.test("Test Multiple Windows MRU", async (t) => {
+        const page1 = await browser.newPage();
+        await page1.bringToFront();
+        const page2 = await browser.newPage();
+        await page2.bringToFront();
+        const window1Id = await service_worker.evaluate(async () => {
+            return currentWindow;
+        });
+
+        const page3 = await CreateNewWindowPage(browser);
+        await page3.bringToFront();
+        const window2Id = await service_worker.evaluate(async () => {
+            return currentWindow;
+        });
+        const page4 = await browser.newPage();
+        await page4.bringToFront();
+
+        var MRUDict = await service_worker.evaluate(async () => {
+            return await chrome.storage.session.get("MRU_ID_Cache");
+        });
+        
+        await service_worker.evaluate(async () => {
+            await switch_tab(1);
+        });
+        await sleep(100);
+        const cacheNew = await service_worker.evaluate(async () => {
+            return await getMRU();
+        });
+        MRUDict = MRUDict.MRU_ID_Cache;
+        const cacheOld = MRUDict[window1Id.toString()];
+        assert.strictEqual(typeof(cacheOld), typeof([]));
+        assert.strictEqual(cacheOld.length, 3);
+        const cacheWindow2 = MRUDict[window2Id.toString()];
+        assert.strictEqual(typeof(cacheWindow2), typeof([]));
+        assert.strictEqual(cacheWindow2.length, 1);
+        console.log(cacheOld);
+        console.log(cacheNew);
+
+        assert.strictEqual(cacheOld[2], cacheNew[1], "tabs should be swapped");
+        assert.strictEqual(cacheNew[2], cacheOld[1], "tabs should be swapped");
+        assert.strictEqual(cacheNew[0], cacheOld[0], "This tab should be unchanged");
     });
 });
 
