@@ -106,6 +106,7 @@ window.addEventListener('keyup', (event) => {
 
                 text_div.appendChild(text);
                 text_div.appendChild(pic1);
+
                 popup.appendChild(text_div);
                 document.body.appendChild(popup);
             } else {

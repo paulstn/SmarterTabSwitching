@@ -23,7 +23,7 @@ export async function initializeExtension() {
     );
     const service_worker = await serviceWorkerTarget.worker();
     // need a small pause to allow chrome to set certain things
-    // I'm not sure why a pause of 0 ms works but without this line some tests fail
-    await sleep(0);
+    // could play around in the future with exact timing but it seems device specific
+    await sleep(100);
     return [browser, service_worker];
 }
