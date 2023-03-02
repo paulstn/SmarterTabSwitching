@@ -76,7 +76,33 @@ test("Extension command to functionality test", async (t) => {
 
     // await t.test("Test content-script multiple Multiple Switching");
 
-    // await t.test("Test Restricted Tab Switching");
+    await t.test("Test Restricted Tab Switching", async (t) => {
+        const page1 = await browser.newPage();
+        await page1.bringToFront();
+        const page2 = await browser.newPage();
+        await page2.bringToFront();
+
+        assert.notStrictEqual(await getActivePage(browser, 3000), page1, "expected us to be on page 2");
+        assert.strictEqual(await getActivePage(browser, 3000), page2, "expected us to be on page 2");
+
+        await page2.keyboard.down("Control");
+
+        await sleep(100);
+
+        await page2.keyboard.down("KeyQ");
+
+        await sleep(100);
+
+        await page2.keyboard.up("KeyQ");
+
+        await sleep(100);
+
+        await page2.keyboard.up('Control');
+
+        await sleep(100);
+
+        assert.strictEqual(await getActivePage(browser, 3000), page1, "we don't end on page 1");
+    });
 
     // await t.test("Test Webpage-Dialogue-Open Switching");
 
