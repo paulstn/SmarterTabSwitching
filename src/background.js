@@ -1,6 +1,6 @@
 // keep an mru cache for every window
 
-const DEBUG = true;
+const DEBUG = false;
 
 async function setMRU(tabs) {
   const window = await chrome.windows.getCurrent();
@@ -53,7 +53,19 @@ async function switch_tab(back_num) {
 chrome.commands.onCommand.addListener(async function(command) {
   // the 'switch-tab' command is defined in the manifest
   if (command === "switch-tab") {
-      await switch_tab(1);
+      console.log("Chrome.commands: Trying switch");
+      let tabs = await chrome.tabs.query({active: true, currentWindow: true});
+      let url = tabs[0].url;
+      const https = "https://";
+      const http = "http://";
+      if (url.slice(0,8) === https || url.slice(0,8) === http) {
+        // send a message to content scripts, q was pressed w/ ctrl
+        await chrome.tabs.sendMessage(tabs[0].id, {qPressed: true});
+        // immediately switch if we're on a restricted site
+      } else {
+        console.log("       Restricted Switch Done");
+        await switch_tab(1);
+      }
   }
 });
 
@@ -70,7 +82,7 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
     // asked for the cache before the cache has been set from the startup handler\
     cache = await initializeMRU(activeInfo.tabId, activeInfo.windowId);
   }
-  console.log(cache);
+  if (DEBUG) { console.log(cache); };
 
   const activeTab = activeInfo.tabId;
   const index = cache.indexOf(activeTab);
@@ -83,12 +95,10 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
 
 
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
-  console.log(message)
-  if (message == "CTRL Q PRESSED") {
-    switch_tab(1);
-    sendResponse("Switch tabs once");
-  } else if (typeof message == "number") {
-    switch_tab(message);
-    sendResponse("Switched to " + message + " most recently used tab")
+  if (DEBUG) { console.log(message); };
+  // this should check if the message has the object contentPresses
+  if (message.contentPresses) {
+    switch_tab(message.contentPresses);
+    console.log("Content Scripts: Switched to " + message.contentPresses + " most recently used tab");
   }
 })
