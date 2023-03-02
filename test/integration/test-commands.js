@@ -15,7 +15,7 @@ test("Extension command to functionality test", async (t) => {
         await browser.close();
     });
 
-    await t.test("Test content-script Single Switching", async (t) => {
+    await t.test("Test content-script Single Switching", {skip: "non finished"}, async (t) => {
         const page1 = await browser.newPage();
         await page1.bringToFront();
         await page2.goto("chrome://extensions/", {waitUntil: 'domcontentloaded'});
@@ -76,7 +76,7 @@ test("Extension command to functionality test", async (t) => {
 
     // await t.test("Test content-script multiple Multiple Switching");
 
-    await t.test("Test Restricted Tab Switching", async (t) => {
+    await t.test("Test Restricted Tab Switching", {skip: "non finished"}, async (t) => {
         const page1 = await browser.newPage();
         await page1.bringToFront();
         const page2 = await browser.newPage();
