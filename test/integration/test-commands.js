@@ -3,7 +3,7 @@
 import puppeteer from "puppeteer";
 import test from "node:test";
 import assert from "node:assert"
-import {initializeExtension, sleep} from "../utils.js";
+import {initializeExtension, sleep, getActivePage} from "../utils.js";
 
 test("Extension command to functionality test", async (t) => {
     var browser = await puppeteer.launch(); await browser.close();
@@ -23,8 +23,8 @@ test("Extension command to functionality test", async (t) => {
         await page2.bringToFront();
         await page2.goto("chrome://extensions/", {waitUntil: 'domcontentloaded'});
 
-        assert.notStrictEqual(await getActivePage(browser, 3000), page1, "expected us to be on page 2");
-        assert.strictEqual(await getActivePage(browser, 3000), page2, "expected us to be on page 2");
+        assert.notStrictEqual(await getActivePage(browser), page1, "expected us to be on page 2");
+        assert.strictEqual(await getActivePage(browser), page2, "expected us to be on page 2");
 
         await page2.keyboard.down("Control");
 
@@ -42,7 +42,7 @@ test("Extension command to functionality test", async (t) => {
 
         await sleep(100);
 
-        assert.strictEqual(await getActivePage(browser, 3000), page1, "we don't end on page 1");
+        assert.strictEqual(await getActivePage(browser), page1, "we don't end on page 1");
     });
     
     await t.test("Test content-script single Multiple Switching", async (t) => {
@@ -52,8 +52,8 @@ test("Extension command to functionality test", async (t) => {
         await page2.goto("https://example.com", {waitUntil: 'domcontentloaded'});
         await page2.bringToFront();
 
-        assert.notStrictEqual(await getActivePage(browser, 3000), page1, "expected us to be on page 2");
-        assert.strictEqual(await getActivePage(browser, 3000), page2, "expected us to be on page 2");
+        assert.notStrictEqual(await getActivePage(browser), page1, "expected us to be on page 2");
+        assert.strictEqual(await getActivePage(browser), page2, "expected us to be on page 2");
 
         await page2.keyboard.down("Control");
 
@@ -71,7 +71,7 @@ test("Extension command to functionality test", async (t) => {
 
         await sleep(100);
 
-        assert.strictEqual(await getActivePage(browser, 3000), page1, "we don't end on page 1");
+        assert.strictEqual(await getActivePage(browser), page1, "we don't end on page 1");
     });
 
     // await t.test("Test content-script multiple Multiple Switching");
@@ -82,8 +82,8 @@ test("Extension command to functionality test", async (t) => {
         const page2 = await browser.newPage();
         await page2.bringToFront();
 
-        assert.notStrictEqual(await getActivePage(browser, 3000), page1, "expected us to be on page 2");
-        assert.strictEqual(await getActivePage(browser, 3000), page2, "expected us to be on page 2");
+        assert.notStrictEqual(await getActivePage(browser), page1, "expected us to be on page 2");
+        assert.strictEqual(await getActivePage(browser), page2, "expected us to be on page 2");
 
         await page2.keyboard.down("Control");
 
@@ -101,7 +101,7 @@ test("Extension command to functionality test", async (t) => {
 
         await sleep(100);
 
-        assert.strictEqual(await getActivePage(browser, 3000), page1, "we don't end on page 1");
+        assert.strictEqual(await getActivePage(browser), page1, "we don't end on page 1");
     });
 
     // await t.test("Test Webpage-Dialogue-Open Switching");
@@ -114,18 +114,3 @@ test("Extension command to functionality test", async (t) => {
     //  */
     // await t.test("Test Slip Switching");
 });
-
-async function getActivePage(browser, timeout) {
-    var start = new Date().getTime();
-    while(new Date().getTime() - start < timeout) {
-        var pages = await browser.pages();
-        var arr = [];
-        for (const p of pages) {
-            if(await p.evaluate(() => { return document.visibilityState == 'visible' })) {
-                arr.push(p);
-            }
-        }
-        if(arr.length == 1) return arr[0];
-    }
-    throw "Unable to get active page";
-}

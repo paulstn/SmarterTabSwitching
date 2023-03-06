@@ -3,7 +3,7 @@
 import puppeteer from "puppeteer";
 import test from "node:test";
 import assert from "node:assert"
-import {initializeExtension, sleep} from "../utils.js";
+import {initializeExtension, sleep, getActivePage} from "../utils.js";
 
 var tabs = ["https://example.com", "https://www.google.com", "https://docs.google.com",
             "chrome://newtab", "chrome://extensions", "https://www.nytimes.com",
@@ -33,15 +33,7 @@ test("Top level fuzzer test", async (t) => {
         const iters = 1000;
         for (var i = 0; i < iters; i++) {
             await sleep(5);
-            var page = null;
-            var found = false;
-            for (const p of await browser.pages()) {
-                // find active page
-                if(!found && await p.evaluate(() => document.visibilityState == 'visible')) {
-                    page = p;
-                    found = true;
-                }
-            }
+            var page = await getActivePage(browser);
             assert.notStrictEqual(page, null);
             var choice = Math.floor(Math.random() * 4);
             if (choice === 0) {
@@ -84,15 +76,7 @@ test("Top level fuzzer test", async (t) => {
         const iters = 1000;
         for (var i = 0; i < iters; i++) {
             await sleep(5);
-            var page = null;
-            var found = false;
-            for (const p of await browser.pages()) {
-                // find active page
-                if(!found && await p.evaluate(() => document.visibilityState == 'visible')) {
-                    page = p;
-                    found = true;
-                }
-            }
+            var page = await getActivePage(browser);
             assert.notStrictEqual(page, null);
             if (Math.random() >= 0.5) {
                 // toggle q being held down
