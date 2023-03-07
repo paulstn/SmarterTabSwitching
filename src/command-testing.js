@@ -101,49 +101,30 @@ window.addEventListener('keyup', (event) => {
                 popup.style.display = "flex";
                 popup.style["align-items"] = "center";
                 popup.style["justify-content"] = "center";
-                popup.style.zIndex = "2147483647"; // max z-index, will appear above all other things
-                // popup.style.width = "100%";
-                // popup.style.height = "100%";
+                popup.style.zIndex = "2147483647"; // max z-index, will appear above all other things        
                 popup.style.top = '50%';
                 popup.style.left = '50%';
                 popup.style.bottom = '50%';
                 popup.style.right = '50%';
                 popup.id = previewId;
-                // popup.style.transform = 'translate(-50%, -50%)';
 
-                const text_div = document.createElement('div');
-                // text_div.style["background-color"] = "white";
+                const text_div = document.createElement('div');      
                 text_div.style.padding = "20px";
-                // text_div.style.width = '100%';
-                // text_div.style.height = '100%';
                 text_div.style.backgroundColor = 'white';
                 text_div.style.border = '1px solid black';
 
-                text = document.createTextNode("Switch tab num times: " + numSwitches);
-                // text.style["text-align"] = "center";
-
-                // const url = window.location.href;
-                // pic1RelPath = `${window.location.origin}/src/preview-pics/1.png`;
-                // const pic1Path = new URL(pic1RelPath, url).href;
-
-                // const absolutePath = __dirname + pic1RelPath;
-
-                // var pic2 = createImage(previewPic2, 100, 100, "10px");
-                // var pic3 = createImage(previewPic3, 100, 100, "10px");
-                // var pic4 = createImage(previewPic4, 100, 100, "10px");
-                // var pic5 = createImage(previewPic5, 100, 100, "10px");
-
-                // text_div.appendChild(text);
-                // text_div.appendChild(pic2);
-                // text_div.appendChild(pic3);
-                // text_div.appendChild(pic4);
-                // text_div.appendChild(pic5);
-
                 // Appends any number of images to popup UI depending on number of imageUrls passed
                 // Currently displays in 100x100 per image TBD: if aspect ratio not defined enough
-                text_div.appendChild(text);
+                // text_div.appendChild(text);
+                var activeIndex = 1;
                 for (var i = 0; i < imageUrls.length; i++) {
-                    var img = createImage(imageUrls[i], 100, 100, "10px");
+                    var img = createImage(imageUrls[i], 100, 100, "10px");  
+                    if (i === activeIndex) {
+                      // Add a blue outline to the active image
+                      img.style.outline = "solid blue 3px";
+                    } else {
+                      img.style.outline = 'none';
+                    }
                     text_div.appendChild(img);
                 }
 
@@ -165,23 +146,16 @@ window.addEventListener('keyup', (event) => {
                 // numImages: number of images in preview box
                 var currentIndex = numSwitches % numImages;
 
-                 // Update the 3 pixel thick blue outline to highlight the active image
+                // Update the 3 pixel thick blue outline to highlight the active image
                 images.forEach((image, index) => {
-                    if (index === currentIndex) {
-                      image.style.outline = '3px solid blue';
-                    } else {
-                      image.style.outline = 'none';
-                    }
-                  });
-                  // preview.children[0].innerHTML = "Switch tab num times: " + numSwitches % 5;
+                  if (index === currentIndex) {
+                    image.style.outline = '3px solid blue';
+                  } else {
+                    image.style.outline = 'none';
+                  }
+                });
             }
-
-
             multipleOccurs = true;
-
-
-
-
         }
     }
 });
