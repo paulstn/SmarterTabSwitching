@@ -45,18 +45,13 @@ async function getMRU() {
 // grab the 5 latest tab images
 // return an array of data_urls
 async function getRecentTabImages() {
-  const tabs = await new Promise(resolve => {
-    chrome.tabs.query({
+  const tabs = await chrome.tabs.query({
       currentWindow: true,
       limit: 5, // return up to 5 tabs
       active: false, // exluding active tab
       lastFocusedWindow: true
-    }, tabs => {
-      // sorting tabs by the last accessed tab in descending order
-      tabs.sort((a, b) => b.lastAccessd - a.lastAccessed);
-      resolve(tabs);
     });
-  });
+  tabs.sort((a, b) => b.lastAccessd - a.lastAccessed);
 
   // capturing a screenshot of each tab and store data URL in an array then
   // it utimately returns an array of data urls.
