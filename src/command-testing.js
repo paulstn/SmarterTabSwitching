@@ -37,8 +37,47 @@ function createImage(src, width, height, marginRight) {
     img.height = height;
     img.style.marginRight = marginRight;
     return img;
-  }
+}
 
+// Creates white popup display with tab preview snapshots layed out and outlined in blue 
+// according to active tab selected
+function createPopup(imageUrls, previewId) {
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.display = "flex";
+    popup.style["align-items"] = "center";
+    popup.style["justify-content"] = "center";
+    popup.style.zIndex = "2147483647"; // max z-index, will appear above all other things        
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.bottom = '50%';
+    popup.style.right = '50%';
+    popup.id = previewId;
+    
+    const text_div = document.createElement('div');      
+    text_div.style.padding = "20px";
+    text_div.style.backgroundColor = 'white';
+    text_div.style.border = '1px solid black';
+  
+    // Appends any number of images to popup UI depending on number of imageUrls passed
+    // Currently displays in 100x100 per image TBD: if aspect ratio not defined enough
+    var activeIndex = 1;
+    for (var i = 0; i < imageUrls.length; i++) {
+      var img = createImage(imageUrls[i], 100, 100, "10px");  
+      if (i === activeIndex) {
+        // Add a blue outline to the active image
+        img.style.outline = "solid blue 3px";
+      } else {
+        img.style.outline = 'none';
+      }
+      text_div.appendChild(img);
+    }
+  
+    text_div.style.whiteSpace = 'nowrap';
+    popup.appendChild(text_div);
+  
+    return popup;
+}  
 
 window.addEventListener('keydown', (event) => {
     if (event.key == "Control") {
@@ -89,49 +128,10 @@ window.addEventListener('keyup', (event) => {
             // is selected in the multiple tab switching preview box
             console.log("Select from multiple tabs");
             numSwitches++
-
-            // TODO: need to modify this behavior to be completely different
-            // if the popup box isn't shown yet..
             if (!multipleOccurs) {
                 console.log("made the box and put it on the screen");
-                // create the popup box below, TODO: we should handle this in some other block of code
-                // hopefully only need to make the below element once...? does that matter?
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.display = "flex";
-                popup.style["align-items"] = "center";
-                popup.style["justify-content"] = "center";
-                popup.style.zIndex = "2147483647"; // max z-index, will appear above all other things        
-                popup.style.top = '50%';
-                popup.style.left = '50%';
-                popup.style.bottom = '50%';
-                popup.style.right = '50%';
-                popup.id = previewId;
-
-                const text_div = document.createElement('div');      
-                text_div.style.padding = "20px";
-                text_div.style.backgroundColor = 'white';
-                text_div.style.border = '1px solid black';
-
-                // Appends any number of images to popup UI depending on number of imageUrls passed
-                // Currently displays in 100x100 per image TBD: if aspect ratio not defined enough
-                // text_div.appendChild(text);
-                var activeIndex = 1;
-                for (var i = 0; i < imageUrls.length; i++) {
-                    var img = createImage(imageUrls[i], 100, 100, "10px");  
-                    if (i === activeIndex) {
-                      // Add a blue outline to the active image
-                      img.style.outline = "solid blue 3px";
-                    } else {
-                      img.style.outline = 'none';
-                    }
-                    text_div.appendChild(img);
-                }
-
-                text_div.style.whiteSpace = 'nowrap';
-
-
-                popup.appendChild(text_div);
+                // Displays popup on click  
+                const popup = createPopup(imageUrls, previewId);
                 document.body.appendChild(popup);
             } else {
                 // This is the branch for when 'Q' is clicked multiple times as 'CTRL' is held
