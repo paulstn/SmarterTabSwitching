@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
-    - type: textarea
+  - type: textarea
     id: system_properties
     attributes:
       label: How is the extension being used? (Operating System, browser (i.e. Edge, Chrome, etc))
