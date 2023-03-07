@@ -60,7 +60,7 @@ async function getRecentTabImages() {
 
   // capturing a screenshot of each tab and store data URL in an array then
   // it utimately returns an array of data urls.
-  const dataUrls = await Promise.all(tabs.map(tab => {
+  const data_urls = await Promise.all(tabs.map(tab => {
     return new Promise(resolve => {
       chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' }, data_urls => {
         resolve(data_urls);
@@ -76,54 +76,6 @@ async function switch_tab(back_num) {
     console.log("command triggered");
   }
   const cache = await getMRU();
-
-  // send the (up to) five most recent tab images to the content script so that
-  // the tab images are accurate
-  /*
-  et ctrlPressed = false;
-
-document.addEventListener('keydown', event => {
-  if (event.key === 'Control') {
-    ctrlPressed = true;
-  } else if (event.key === 'q' && ctrlPressed) {
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-      // Sort tabs by lastAccessed property to get most recently accessed tabs first
-      tabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
-
-      chrome.windows.create({
-        type: 'popup',
-        width: 600,
-        height: 400,
-        focused: true
-      }, popupWindow => {
-        // Capture images of the top 5 tabs in the list
-        const numTabs = Math.min(5, tabs.length);
-        for (let i = 0; i < numTabs; i++) {
-          chrome.tabs.captureTab(tabs[i].id, { format: 'png' }, dataUrl => {
-            const img = document.createElement('img');
-            img.src = dataUrl;
-            popupWindow.tabs[0].appendChild(img);
-          });
-        }
-      });
-    });
-  }
-});
-
-document.addEventListener('keyup', event => {
-  if (event.key === 'Control') {
-    ctrlPressed = false;
-  }
-});
-  
-
-
-  */
-  
-  var tabImages = await getRecentTabImages();
-  // send all the most recent tab images to the tab it will switch to
-  await chrome.tabs.sendMessage(cache.at(cache.length - 1 - back_num), {image: [previewPic2,previewPic3,previewPic4]}); // should send tabImages
-
   // this automatically calls to the tab onActivated callback so we don't
   // need to set the cache to anything here
   await chrome.tabs.update(cache.at(cache.length - 1 - back_num), {active: true, highlighted: true});
@@ -171,6 +123,9 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   }
   cache.push(activeTab);
   await setMRU(cache);
+
+  var tabImages = await getRecentTabImages();
+  console.log(tabImages);
 });
 
 
@@ -180,5 +135,9 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
   if (message.contentPresses) {
     switch_tab(message.contentPresses);
     console.log("Content Scripts: Switched to " + message.contentPresses + " most recently used tab");
+  } else if (message.grabImages) {
+    var tabImages = getRecentTabImages();
+    console.log(tabImages);
+    sender.sendResponse(tabImages);
   }
 })

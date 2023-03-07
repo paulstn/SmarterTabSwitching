@@ -89,6 +89,9 @@ window.addEventListener('keyup', (event) => {
             // TODO: need to modify this behavior to be completely different
             // if the popup box isn't shown yet..
             if (!multipleOccurs) {
+                // send a message to the code to grab the most recent tabs
+                var imageUrls = chrome.runtime.sendMessage(null, {grabImages: true}).then().then();
+
                 console.log("made the box and put it on the screen");
                 // create the popup box below, TODO: we should handle this in some other block of code
                 // hopefully only need to make the below element once...? does that matter?
