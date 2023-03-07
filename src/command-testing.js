@@ -127,26 +127,6 @@ window.addEventListener('keyup', (event) => {
                 var pic4 = createImage(previewPic4, 100, 100, "10px");
                 var pic5 = createImage(previewPic5, 100, 100, "10px");
 
-                const images = [
-                    pic2,
-                    pic3,
-                    pic4,
-                    pic5
-                  ];
-                
-                // let currentIndex = 0;
-                // currentIndex = (currentIndex + 1) % images.length;
-                let currentIndex = 0;
-                currentIndex = numSwitches % images.length;
-                // Update the outline to highlight the active image
-                images.forEach((image, index) => {
-                    if (index === currentIndex) {
-                    image.style.outline = '3px solid blue';
-                    } else {
-                    image.style.outline = 'none';
-                    }
-                });
-
                 text_div.appendChild(text);
                 text_div.appendChild(pic2);
                 text_div.appendChild(pic3);
@@ -160,7 +140,18 @@ window.addEventListener('keyup', (event) => {
                 document.body.appendChild(popup);
             } else {
                 var preview = document.getElementById(previewId);
-                preview.children[0].innerHTML = "Switch tab num times: " + numSwitches % 5;
+                var images = preview.querySelectorAll('img');
+                var numImages = images.length;
+                var currentIndex = numSwitches % numImages;
+
+                images.forEach((image, index) => {
+                    if (index === currentIndex) {
+                      image.style.outline = '3px solid blue';
+                    } else {
+                      image.style.outline = 'none';
+                    }
+                  });
+                  // preview.children[0].innerHTML = "Switch tab num times: " + numSwitches % 5;
             }
 
 
