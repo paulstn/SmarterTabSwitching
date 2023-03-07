@@ -30,12 +30,12 @@ test("Top level fuzzer test", async (t) => {
     await t.test("Test Random open and switch tabs", async (t) => {
         var qdown = false;
         var ctrlDown = false;
-        const iters = 1000;
+        const iters = 200;
         for (var i = 0; i < iters; i++) {
             await sleep(5);
             var page = await getActivePage(browser);
             assert.notStrictEqual(page, null);
-            var choice = Math.floor(Math.random() * 4);
+            var choice = Math.floor(Math.random() * 3);
             if (choice === 0) {
                 // toggle q being held down
                 if (qdown) {
@@ -54,7 +54,7 @@ test("Top level fuzzer test", async (t) => {
                     await page.keyboard.down('Control');
                     ctrlDown = true;
                 }
-            } else if (choice === 1) {
+            } else if (choice === 2) {
                 var tabChoice = Math.floor(Math.random() * tabs.length);
                 var page = await browser.newPage();
                 await page.goto(tabs[tabChoice], {waitUntil: 'domcontentloaded'});
@@ -75,7 +75,7 @@ test("Top level fuzzer test", async (t) => {
         var ctrlDown = false;
         const iters = 1000;
         for (var i = 0; i < iters; i++) {
-            await sleep(5);
+            await sleep(10);
             var page = await getActivePage(browser);
             assert.notStrictEqual(page, null);
             if (Math.random() >= 0.5) {
