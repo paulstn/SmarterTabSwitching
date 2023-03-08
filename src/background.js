@@ -97,4 +97,18 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
     switch_tab(message.contentPresses);
     console.log("Content Scripts: Switched to " + message.contentPresses + " most recently used tab");
   }
+
+  if (message.name == "CTRL+ArrowLeft") {
+    let tab = getCurrentTab();
+    let tabsInWindow = getWindowTabs(tab.windowId);
+
+    let currentIndex = tab.index
+    let nextIndex = currentIndex - 1
+    if (nextIndex <= 0) {
+      nextIndex = tabsInWindow.length;
+    }
+
+    let nextTabId = tabsInWindow[nextIndex].tabId;
+    chrome.tabs.update(nextTabId, { active: true, highlighted: true });
+  }
 })
