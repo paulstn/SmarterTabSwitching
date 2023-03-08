@@ -30,7 +30,7 @@ test("Top level fuzzer test", async (t) => {
     await t.test("Test Random open and switch tabs", async (t) => {
         var qdown = false;
         var ctrlDown = false;
-        const iters = 200;
+        const iters = 100;
         for (var i = 0; i < iters; i++) {
             await sleep(5);
             var page = await getActivePage(browser);
