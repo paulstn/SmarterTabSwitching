@@ -45,8 +45,6 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if (request.qPressed) {
         qDown = true;
-      } else if (request.image) {
-        imageUrls = request.image;
       }
     }
   );  
