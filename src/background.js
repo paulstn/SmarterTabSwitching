@@ -4,6 +4,8 @@ const DEBUG = false;
 
 var currentWindow = -1;
 
+var tabImages = []
+
 async function setMRU(tabs) {
   const result = await chrome.storage.session.get("MRU_ID_Cache");
   var dict = result.MRU_ID_Cache;
@@ -85,6 +87,14 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   if (index != -1) {
     cache.splice(index, 1);
   }
+
+  let si = await chrome.tabs.captureVisibleTab();
+  tabImages.push(si);
+  if (tabImages.length > 5) {
+    // remove the last image
+    tabImages.shift();
+  }
+
   cache.push(activeTab);
   await setMRU(cache);
 });
@@ -96,5 +106,7 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
   if (message.contentPresses) {
     switch_tab(message.contentPresses);
     console.log("Content Scripts: Switched to " + message.contentPresses + " most recently used tab");
+  } else if (message.grabImages) {
+    sendResponse(tabImages);
   }
 })

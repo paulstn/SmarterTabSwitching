@@ -129,10 +129,12 @@ window.addEventListener('keyup', (event) => {
             console.log("Select from multiple tabs");
             numSwitches++
             if (!multipleOccurs) {
-                console.log("made the box and put it on the screen");
-                // Displays popup on click  
-                const popup = createPopup(imageUrls, previewId);
-                document.body.appendChild(popup);
+                chrome.runtime.sendMessage(null, {grabImages: true}, (response) => {
+                  console.log("made the box and put it on the screen");
+                  // Displays popup on click  
+                  const popup = createPopup(response, previewId);
+                  document.body.appendChild(popup);
+                });
             } else {
                 // This is the branch for when 'Q' is clicked multiple times as 'CTRL' is held
                 var preview = document.getElementById(previewId);
