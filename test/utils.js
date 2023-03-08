@@ -39,3 +39,16 @@ export async function getActivePage(browser) {
     if(arr.length == 1) return arr[0];
     throw "Unable to get active page";
 }
+
+export async function CreateNewWindowPage(browser, index = null) {
+    if (index === null) {
+        index = "";
+    } else {
+        index = index.toString();
+    }
+    const session = await browser.target().createCDPSession();
+
+    const targetId = await session.send('Target.createTarget', {url: "https://www.example.com/" + index, newWindow: true});
+    await session.send('Target.attachToBrowserTarget', {targetId: targetId.targetId});
+    return await browser.targets().find((tg) => tg.url() === "https://www.example.com/" + index).page();
+}
