@@ -123,13 +123,14 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   tabImages.push(image);
   if (tabImages.length > 5) {
     // remove the last image
+    tabImages.shift();
   }
 
-  chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
-    const activeTab = tabs[0];
-    // Store the active tab in local storage
-    chrome.storage.local.set({ activeTab: activeTab });
-  });
+  // chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
+  //   const activeTab = tabs[0];
+  //   // Store the active tab in local storage
+  //   chrome.storage.local.set({ activeTab: activeTab });
+  // });
 });
 
 
