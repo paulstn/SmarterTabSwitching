@@ -75,6 +75,33 @@ test("Top level extension test", async (t) => {
         assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
     });
 
+    await t.test('Test switch tabs via keyboard', async (t) => {
+        const page1 = await browser.newPage();
+        await page1.bringToFront();
+        const page2 = await browser.newPage();
+        await page2.goto("https://example.com", {waitUntil: 'domcontentloaded'});
+        await page2.bringToFront();
+
+        const cache1 = await service_worker.evaluate(async () => {
+            return await getMRU();
+        });
+        await page2.keyboard.down("Control");
+        await page2.keyboard.down("q");
+        await sleep(50);
+        await page2.keyboard.up("q");
+        await sleep(50);
+        const preview = await page2.$("#SmarterTabSwitchingPreviewPopupBox");
+        console.log(preview);
+        assert.notStrictEqual(preview, null);
+        await page2.keyboard.up('Control');
+        await sleep(100);
+        const cache2 = await service_worker.evaluate(async () => {
+            return await getMRU();
+        });
+        assert.strictEqual(cache1[0], cache2[1], "tabs should be swapped");
+        assert.strictEqual(cache2[0], cache1[1], "tabs should be swapped");
+    });
+
     // Not sure how to add more than 1 tab to a window but this at least make sure we're tracking
     // tabs across all windows
     await t.test("Test Multiple Windows MRU", async (t) => {

@@ -28,6 +28,18 @@ export async function initializeExtension() {
     return [browser, service_worker];
 }
 
+export async function getActivePage(browser) {
+    var pages = await browser.pages();
+    var arr = [];
+    for (const p of pages) {
+        if(await p.evaluate(() => { return document.visibilityState == 'visible' })) {
+            arr.push(p);
+        }
+    }
+    if(arr.length == 1) return arr[0];
+    throw "Unable to get active page";
+}
+
 export async function CreateNewWindowPage(browser, index = null) {
     if (index === null) {
         index = "";
@@ -39,5 +51,4 @@ export async function CreateNewWindowPage(browser, index = null) {
     const targetId = await session.send('Target.createTarget', {url: "https://www.example.com/" + index, newWindow: true});
     await session.send('Target.attachToBrowserTarget', {targetId: targetId.targetId});
     return await browser.targets().find((tg) => tg.url() === "https://www.example.com/" + index).page();
-
 }
