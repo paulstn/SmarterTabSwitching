@@ -48,7 +48,7 @@ async function getRecentTabImages() {
   const tabs = await chrome.tabs.query({
       currentWindow: true,
       limit: 5, // return up to 5 tabs
-      active: false, // exluding active tab
+      active: true,
       lastFocusedWindow: true
     });
   tabs.sort((a, b) => b.lastAccessd - a.lastAccessed);
@@ -119,8 +119,13 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
   cache.push(activeTab);
   await setMRU(cache);
 
-  var tabImages = await getRecentTabImages();
-  console.log(tabImages);
+  // capture the visible tab
+  // store it?
+  chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
+    const activeTab = tabs[0];
+    // Store the active tab in local storage
+    chrome.storage.local.set({ activeTab: activeTab });
+  });
 });
 
 
