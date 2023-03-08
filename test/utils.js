@@ -27,3 +27,17 @@ export async function initializeExtension() {
     await sleep(100);
     return [browser, service_worker];
 }
+
+export async function CreateNewWindowPage(browser, index = null) {
+    if (index === null) {
+        index = "";
+    } else {
+        index = index.toString();
+    }
+    const session = await browser.target().createCDPSession();
+
+    const targetId = await session.send('Target.createTarget', {url: "https://www.example.com/" + index, newWindow: true});
+    await session.send('Target.attachToBrowserTarget', {targetId: targetId.targetId});
+    return await browser.targets().find((tg) => tg.url() === "https://www.example.com/" + index).page();
+
+}
